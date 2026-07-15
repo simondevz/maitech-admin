@@ -76,10 +76,12 @@ export interface Product {
   created_at: string;
   updated_at: string;
   category?: Category;
-  variants: ProductVariant[];
-  features: ProductFeature[];
-  specs: ProductSpec[];
-  images: ProductImage[];
+  // Backend tags these `omitempty` — an empty relation is dropped from the
+  // JSON entirely rather than sent as `[]`, so these are genuinely optional.
+  variants?: ProductVariant[];
+  features?: ProductFeature[];
+  specs?: ProductSpec[];
+  images?: ProductImage[];
 }
 
 export type InstallmentStatus = "pending" | "approved" | "declined" | "forwarded";
@@ -121,7 +123,9 @@ export interface InstallmentApplication {
   reviewed_at?: string;
   decline_reason?: string;
   forwarded_at?: string;
-  documents: InstallmentDocument[];
+  // Backend tags this `omitempty` — no documents uploaded means the key is
+  // dropped entirely, not sent as `[]`.
+  documents?: InstallmentDocument[];
   created_at: string;
 }
 
@@ -170,7 +174,9 @@ export interface User {
   invited_by?: string;
   created_at: string;
   updated_at: string;
-  roles: Role[];
+  // Backend tags this `omitempty` — a user with no roles assigned has the
+  // key dropped entirely, not sent as `[]`.
+  roles?: Role[];
 }
 
 export interface Invitation {
@@ -179,4 +185,15 @@ export interface Invitation {
   expires_at: string;
   roles: string[];
   dev_code?: string;
+}
+
+export interface Me {
+  user_id: string;
+  user_type: "dev_admin" | "regular";
+  name: string;
+  email: string;
+  is_active: boolean;
+  roles: string[];
+  /** "*" means every permission (super_admin bypass), not a literal permission name. */
+  permissions: string[];
 }

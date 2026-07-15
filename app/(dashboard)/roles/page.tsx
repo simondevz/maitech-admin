@@ -4,9 +4,12 @@ import { Plus, ShieldCheck } from "lucide-react";
 
 import { useRoles } from "@/hooks/queries/useRoles";
 import { PageHeader } from "@/components/shared/page-header";
+import { PermissionDenied } from "@/components/shared/permission-denied";
+import { PermissionButton } from "@/components/shared/permission-button";
 import { RoleFormDialog } from "@/components/roles/role-form-dialog";
 import { EditPrivilegesDialog } from "@/components/roles/edit-privileges-dialog";
-import { Button } from "@/components/ui/button";
+import { useCan } from "@/components/providers/permissions-provider";
+import { PERMISSIONS } from "@/lib/permissions";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -19,7 +22,10 @@ import {
 } from "@/components/ui/table";
 
 export default function RolesPage() {
+  const canRead = useCan(PERMISSIONS.rolesRead);
   const { data: roles, isLoading, isError, error } = useRoles();
+
+  if (!canRead) return <PermissionDenied />;
 
   return (
     <div>
@@ -29,9 +35,9 @@ export default function RolesPage() {
         actions={
           <RoleFormDialog
             trigger={
-              <Button>
+              <PermissionButton permission={PERMISSIONS.rolesCreate}>
                 <Plus /> New role
-              </Button>
+              </PermissionButton>
             }
           />
         }
@@ -82,9 +88,13 @@ export default function RolesPage() {
                   <EditPrivilegesDialog
                     role={role}
                     trigger={
-                      <Button variant="outline" size="sm">
+                      <PermissionButton
+                        permission={PERMISSIONS.rolesUpdate}
+                        variant="outline"
+                        size="sm"
+                      >
                         <ShieldCheck /> Edit privileges
-                      </Button>
+                      </PermissionButton>
                     }
                   />
                 </TableCell>

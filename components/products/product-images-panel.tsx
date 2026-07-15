@@ -7,7 +7,8 @@ import { Trash2, Upload } from "lucide-react";
 
 import type { ProductImage } from "@/lib/backend/types";
 import { useDeleteProductImage, useUploadProductImage } from "@/hooks/queries/useProducts";
-import { Button } from "@/components/ui/button";
+import { PermissionButton } from "@/components/shared/permission-button";
+import { PERMISSIONS } from "@/lib/permissions";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 export function ProductImagesPanel({
@@ -48,13 +49,14 @@ export function ProductImagesPanel({
             />
             <ConfirmDialog
               trigger={
-                <Button
+                <PermissionButton
+                  permission={PERMISSIONS.productsUpdate}
                   variant="destructive"
                   size="icon-sm"
                   className="absolute top-2 right-2 opacity-0 group-hover:opacity-100"
                 >
                   <Trash2 />
-                </Button>
+                </PermissionButton>
               }
               title="Delete image?"
               description="This cannot be undone."
@@ -79,14 +81,15 @@ export function ProductImagesPanel({
         className="hidden"
         onChange={handleFileSelect}
       />
-      <Button
+      <PermissionButton
         type="button"
         variant="outline"
+        permission={PERMISSIONS.productsUpdate}
         onClick={() => inputRef.current?.click()}
         disabled={uploadImage.isPending}
       >
         <Upload /> {uploadImage.isPending ? "Uploading..." : "Upload image"}
-      </Button>
+      </PermissionButton>
     </div>
   );
 }

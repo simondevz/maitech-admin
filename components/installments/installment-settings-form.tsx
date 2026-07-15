@@ -7,7 +7,8 @@ import { toast } from "sonner";
 
 import type { InstallmentSettings } from "@/lib/backend/types";
 import { useUpdateInstallmentSettings } from "@/hooks/queries/useInstallments";
-import { Button } from "@/components/ui/button";
+import { PermissionButton } from "@/components/shared/permission-button";
+import { PERMISSIONS } from "@/lib/permissions";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -167,9 +168,13 @@ export function InstallmentSettingsForm({ settings }: { settings: InstallmentSet
           )}
         />
 
-        <Button type="submit" disabled={form.formState.isSubmitting}>
+        <PermissionButton
+          type="submit"
+          disabled={form.formState.isSubmitting}
+          permission={PERMISSIONS.installmentsUpdate}
+        >
           Save settings
-        </Button>
+        </PermissionButton>
       </form>
     </Form>
   );

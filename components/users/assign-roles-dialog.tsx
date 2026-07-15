@@ -25,13 +25,13 @@ export function AssignRolesDialog({
   trigger: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
-  const [roles, setRoles] = useState<string[]>(user.roles.map((r) => r.slug));
+  const [roles, setRoles] = useState<string[]>((user.roles ?? []).map((r) => r.slug));
   const { data: allRoles } = useRoles();
   const assignRoles = useAssignRoles();
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
-    if (next) setRoles(user.roles.map((r) => r.slug));
+    if (next) setRoles((user.roles ?? []).map((r) => r.slug));
   }
 
   async function handleSubmit(e: React.FormEvent) {

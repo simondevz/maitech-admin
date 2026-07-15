@@ -9,7 +9,9 @@ import { Plus, Trash2 } from "lucide-react";
 
 import type { ProductVariant } from "@/lib/backend/types";
 import { useAddVariant, useDeleteVariant, useUpdateVariant } from "@/hooks/queries/useProducts";
-import { Button } from "@/components/ui/button";
+import { useCan } from "@/components/providers/permissions-provider";
+import { PermissionButton } from "@/components/shared/permission-button";
+import { PERMISSIONS } from "@/lib/permissions";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -38,6 +40,7 @@ export function ProductVariantsPanel({
   productId: number;
   variants: ProductVariant[];
 }) {
+  const canUpdate = useCan(PERMISSIONS.productsUpdate);
   const addVariant = useAddVariant(productId);
 
   const form = useForm({
@@ -76,7 +79,12 @@ export function ProductVariantsPanel({
             </TableRow>
           )}
           {variants.map((variant) => (
-            <VariantRow key={variant.id} productId={productId} variant={variant} />
+            <VariantRow
+              key={variant.id}
+              productId={productId}
+              variant={variant}
+              canUpdate={canUpdate}
+            />
           ))}
         </TableBody>
       </Table>
@@ -84,15 +92,25 @@ export function ProductVariantsPanel({
       <form onSubmit={form.handleSubmit(onAdd)} className="flex items-end gap-2">
         <div className="flex-1">
           <label className="mb-1 block text-xs text-muted-foreground">Name</label>
-          <Input {...form.register("name")} />
+          <Input {...form.register("name")} disabled={!canUpdate} />
         </div>
         <div>
           <label className="mb-1 block text-xs text-muted-foreground">Price adjust</label>
-          <Input type="number" step="0.01" className="w-32" {...form.register("price_adjust")} />
+          <Input
+            type="number"
+            step="0.01"
+            className="w-32"
+            disabled={!canUpdate}
+            {...form.register("price_adjust")}
+          />
         </div>
-        <Button type="submit" disabled={form.formState.isSubmitting}>
+        <PermissionButton
+          type="submit"
+          disabled={form.formState.isSubmitting}
+          permission={PERMISSIONS.productsUpdate}
+        >
           <Plus /> Add variant
-        </Button>
+        </PermissionButton>
       </form>
     </div>
   );
@@ -101,9 +119,11 @@ export function ProductVariantsPanel({
 function VariantRow({
   productId,
   variant,
+  canUpdate,
 }: {
   productId: number;
   variant: ProductVariant;
+  canUpdate: boolean;
 }) {
   const updateVariant = useUpdateVariant(productId);
   const deleteVariant = useDeleteVariant(productId);
@@ -114,6 +134,7 @@ function VariantRow({
       <TableCell>
         <Input
           value={name}
+          disabled={!canUpdate}
           onChange={(e) => setName(e.target.value)}
           onBlur={() => {
             if (name !== variant.name) {
@@ -126,6 +147,7 @@ function VariantRow({
       <TableCell>
         <Switch
           checked={variant.is_default}
+          disabled={!canUpdate}
           onCheckedChange={(checked) =>
             updateVariant.mutate({ variantId: variant.id, input: { is_default: checked } })
           }
@@ -134,6 +156,7 @@ function VariantRow({
       <TableCell>
         <Switch
           checked={variant.in_stock}
+          disabled={!canUpdate}
           onCheckedChange={(checked) =>
             updateVariant.mutate({ variantId: variant.id, input: { in_stock: checked } })
           }
@@ -142,9 +165,13 @@ function VariantRow({
       <TableCell className="text-right">
         <ConfirmDialog
           trigger={
-            <Button variant="ghost" size="icon-sm">
+            <PermissionButton
+              permission={PERMISSIONS.productsUpdate}
+              variant="ghost"
+              size="icon-sm"
+            >
               <Trash2 />
-            </Button>
+            </PermissionButton>
           }
           title={`Delete ${variant.name}?`}
           description="This cannot be undone."

@@ -6,8 +6,11 @@ import { toast } from "sonner";
 import { useCategories, useDeleteCategory } from "@/hooks/queries/useCategories";
 import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { PermissionDenied } from "@/components/shared/permission-denied";
+import { PermissionButton } from "@/components/shared/permission-button";
 import { CategoryFormDialog } from "@/components/categories/category-form-dialog";
-import { Button } from "@/components/ui/button";
+import { useCan } from "@/components/providers/permissions-provider";
+import { PERMISSIONS } from "@/lib/permissions";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -19,8 +22,11 @@ import {
 } from "@/components/ui/table";
 
 export default function CategoriesPage() {
+  const canRead = useCan(PERMISSIONS.categoriesRead);
   const { data: categories, isLoading, isError, error } = useCategories();
   const deleteCategory = useDeleteCategory();
+
+  if (!canRead) return <PermissionDenied />;
 
   return (
     <div>
@@ -30,9 +36,9 @@ export default function CategoriesPage() {
         actions={
           <CategoryFormDialog
             trigger={
-              <Button>
+              <PermissionButton permission={PERMISSIONS.categoriesCreate}>
                 <Plus /> New category
-              </Button>
+              </PermissionButton>
             }
           />
         }
@@ -84,16 +90,24 @@ export default function CategoriesPage() {
                     <CategoryFormDialog
                       category={category}
                       trigger={
-                        <Button variant="ghost" size="icon-sm">
+                        <PermissionButton
+                          permission={PERMISSIONS.categoriesUpdate}
+                          variant="ghost"
+                          size="icon-sm"
+                        >
                           <Pencil />
-                        </Button>
+                        </PermissionButton>
                       }
                     />
                     <ConfirmDialog
                       trigger={
-                        <Button variant="ghost" size="icon-sm">
+                        <PermissionButton
+                          permission={PERMISSIONS.categoriesDelete}
+                          variant="ghost"
+                          size="icon-sm"
+                        >
                           <Trash2 />
-                        </Button>
+                        </PermissionButton>
                       }
                       title={`Delete ${category.name}?`}
                       description="This cannot be undone. Products in this category will be unaffected but will lose their category link."

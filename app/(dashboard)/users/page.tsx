@@ -6,8 +6,12 @@ import { toast } from "sonner";
 import { useDeactivateUser, useInitiatePasswordReset, useUsers } from "@/hooks/queries/useUsers";
 import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { PermissionDenied } from "@/components/shared/permission-denied";
+import { PermissionButton } from "@/components/shared/permission-button";
 import { InviteUserDialog } from "@/components/users/invite-user-dialog";
 import { AssignRolesDialog } from "@/components/users/assign-roles-dialog";
+import { useCan } from "@/components/providers/permissions-provider";
+import { PERMISSIONS } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,9 +25,12 @@ import {
 } from "@/components/ui/table";
 
 export default function UsersPage() {
+  const canRead = useCan(PERMISSIONS.usersRead);
   const { data: users, isLoading, isError, error } = useUsers();
   const deactivateUser = useDeactivateUser();
   const resetPassword = useInitiatePasswordReset();
+
+  if (!canRead) return <PermissionDenied />;
 
   return (
     <div>
@@ -31,6 +38,9 @@ export default function UsersPage() {
         title="Users"
         description="Manage admin accounts and their roles."
         actions={
+          // Invite user is intentionally ungated — POST /admin/invitations
+          // has no RequirePrivilege on the backend, only Authenticate, so
+          // every logged-in admin can genuinely send invitations.
           <InviteUserDialog
             trigger={
               <Button>
@@ -80,7 +90,7 @@ export default function UsersPage() {
                 <TableCell className="text-muted-foreground">{user.email}</TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
-                    {user.roles.map((role) => (
+                    {(user.roles ?? []).map((role) => (
                       <Badge key={role.id} variant="secondary">
                         {role.name}
                       </Badge>
@@ -97,12 +107,18 @@ export default function UsersPage() {
                     <AssignRolesDialog
                       user={user}
                       trigger={
-                        <Button variant="ghost" size="icon-sm" title="Assign roles">
+                        <PermissionButton
+                          permission={PERMISSIONS.permissionsAssign}
+                          variant="ghost"
+                          size="icon-sm"
+                          title="Assign roles"
+                        >
                           <ShieldCheck />
-                        </Button>
+                        </PermissionButton>
                       }
                     />
-                    <Button
+                    <PermissionButton
+                      permission={[PERMISSIONS.usersUpdate, PERMISSIONS.usersResetPassword]}
                       variant="ghost"
                       size="icon-sm"
                       title="Reset password"
@@ -118,13 +134,18 @@ export default function UsersPage() {
                       }}
                     >
                       <KeyRound />
-                    </Button>
+                    </PermissionButton>
                     {user.is_active && (
                       <ConfirmDialog
                         trigger={
-                          <Button variant="ghost" size="icon-sm" title="Deactivate">
+                          <PermissionButton
+                            permission={PERMISSIONS.usersUpdate}
+                            variant="ghost"
+                            size="icon-sm"
+                            title="Deactivate"
+                          >
                             <UserX />
-                          </Button>
+                          </PermissionButton>
                         }
                         title={`Deactivate ${user.name}?`}
                         description="They will lose access immediately."

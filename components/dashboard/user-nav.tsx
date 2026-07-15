@@ -2,6 +2,7 @@
 
 import { LogOut } from "lucide-react";
 import { logout } from "@/lib/actions/auth";
+import { useCurrentUser } from "@/components/providers/permissions-provider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,21 +12,24 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import type { SessionPayload } from "@/lib/session";
 
-export function UserNav({ session }: { session: SessionPayload }) {
-  const label =
-    session.userType === "dev_admin" ? "Dev admin" : session.roles.join(", ") || "Admin";
+export function UserNav() {
+  const me = useCurrentUser();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm">
-          {label}
+          {me.name}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>{label}</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          <div className="flex flex-col">
+            <span>{me.name}</span>
+            <span className="text-xs font-normal text-muted-foreground">{me.email}</span>
+          </div>
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <form action={logout} className="w-full">

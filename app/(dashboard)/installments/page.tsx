@@ -6,7 +6,10 @@ import { Settings } from "lucide-react";
 
 import { useInstallments } from "@/hooks/queries/useInstallments";
 import { PageHeader } from "@/components/shared/page-header";
+import { PermissionDenied } from "@/components/shared/permission-denied";
 import { InstallmentStatusBadge } from "@/components/installments/status-badge";
+import { useCan } from "@/components/providers/permissions-provider";
+import { PERMISSIONS } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -37,6 +40,7 @@ const PAGE_SIZE = 20;
 const STATUSES: InstallmentStatus[] = ["pending", "approved", "declined", "forwarded"];
 
 export default function InstallmentsPage() {
+  const canRead = useCan(PERMISSIONS.installmentsRead);
   const [status, setStatus] = useState<string>("all");
   const [planType, setPlanType] = useState<string>("all");
   const [page, setPage] = useState(1);
@@ -58,6 +62,8 @@ export default function InstallmentsPage() {
     currency: "NGN",
     maximumFractionDigits: 0,
   });
+
+  if (!canRead) return <PermissionDenied />;
 
   return (
     <div>

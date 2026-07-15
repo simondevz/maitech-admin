@@ -14,9 +14,12 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { NAV_ITEMS } from "@/components/dashboard/nav-items";
+import { usePermissionsContext } from "@/components/providers/permissions-provider";
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { can } = usePermissionsContext();
+  const visibleItems = NAV_ITEMS.filter((item) => !item.permission || can(item.permission));
 
   return (
     <Sidebar collapsible="icon">
@@ -34,7 +37,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => {
+              {visibleItems.map((item) => {
                 const isActive =
                   pathname === item.href || pathname.startsWith(`${item.href}/`);
                 return (

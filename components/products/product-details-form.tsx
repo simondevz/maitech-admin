@@ -9,6 +9,8 @@ import { Plus, Trash2 } from "lucide-react";
 
 import type { Category, Product } from "@/lib/backend/types";
 import { useCreateProduct, useUpdateProduct } from "@/hooks/queries/useProducts";
+import { PermissionButton } from "@/components/shared/permission-button";
+import { PERMISSIONS } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -68,8 +70,8 @@ export function ProductDetailsForm({
       description: product?.description ?? "",
       base_price: product?.base_price ?? 0,
       in_stock: product?.in_stock ?? true,
-      features: product?.features.map((f) => ({ text: f.text })) ?? [],
-      specs: product?.specs.map((s) => ({ label: s.label, value: s.value })) ?? [],
+      features: product?.features?.map((f) => ({ text: f.text })) ?? [],
+      specs: product?.specs?.map((s) => ({ label: s.label, value: s.value })) ?? [],
     },
   });
 
@@ -260,9 +262,13 @@ export function ProductDetailsForm({
           </div>
         </div>
 
-        <Button type="submit" disabled={form.formState.isSubmitting}>
+        <PermissionButton
+          type="submit"
+          disabled={form.formState.isSubmitting}
+          permission={isEdit ? PERMISSIONS.productsUpdate : PERMISSIONS.productsCreate}
+        >
           {isEdit ? "Save changes" : "Create product"}
-        </Button>
+        </PermissionButton>
       </form>
     </Form>
   );

@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session-server";
+import { getMe } from "@/lib/actions/permissions";
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { UserNav } from "@/components/dashboard/user-nav";
+import { PermissionsProvider } from "@/components/providers/permissions-provider";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 
@@ -13,19 +15,24 @@ export default async function DashboardLayout({
   const session = await getSession();
   if (!session) redirect("/login");
 
+  const meResult = await getMe();
+  if (!meResult.ok) throw new Error(meResult.error.message);
+
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center justify-between border-b px-4">
-          <div className="flex items-center gap-2">
-            <SidebarTrigger />
-            <Separator orientation="vertical" className="h-5" />
-          </div>
-          <UserNav session={session} />
-        </header>
-        <main className="flex-1 p-6">{children}</main>
-      </SidebarInset>
-    </SidebarProvider>
+    <PermissionsProvider initialData={meResult.data}>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <header className="flex h-14 shrink-0 items-center justify-between border-b px-4">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger />
+              <Separator orientation="vertical" className="h-5" />
+            </div>
+            <UserNav />
+          </header>
+          <main className="flex-1 p-6">{children}</main>
+        </SidebarInset>
+      </SidebarProvider>
+    </PermissionsProvider>
   );
 }

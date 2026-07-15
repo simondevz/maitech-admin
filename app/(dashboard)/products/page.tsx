@@ -9,6 +9,10 @@ import { useCategories } from "@/hooks/queries/useCategories";
 import { useDeleteProduct, useProducts } from "@/hooks/queries/useProducts";
 import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { PermissionDenied } from "@/components/shared/permission-denied";
+import { PermissionButton } from "@/components/shared/permission-button";
+import { useCan } from "@/components/providers/permissions-provider";
+import { PERMISSIONS } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -39,6 +43,7 @@ import {
 const PAGE_SIZE = 20;
 
 export default function ProductsPage() {
+  const canRead = useCan(PERMISSIONS.productsRead);
   const [category, setCategory] = useState<string>("all");
   const [page, setPage] = useState(1);
 
@@ -61,17 +66,19 @@ export default function ProductsPage() {
     maximumFractionDigits: 0,
   });
 
+  if (!canRead) return <PermissionDenied />;
+
   return (
     <div>
       <PageHeader
         title="Products"
         description="Manage the product catalog."
         actions={
-          <Button asChild>
+          <PermissionButton permission={PERMISSIONS.productsCreate} asChild>
             <Link href="/products/new">
               <Plus /> New product
             </Link>
-          </Button>
+          </PermissionButton>
         }
       />
 
@@ -156,9 +163,13 @@ export default function ProductsPage() {
                       </Button>
                       <ConfirmDialog
                         trigger={
-                          <Button variant="ghost" size="icon-sm">
+                          <PermissionButton
+                            permission={PERMISSIONS.productsDelete}
+                            variant="ghost"
+                            size="icon-sm"
+                          >
                             <Trash2 />
-                          </Button>
+                          </PermissionButton>
                         }
                         title={`Delete ${product.name}?`}
                         description="This cannot be undone."

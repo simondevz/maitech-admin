@@ -25,5 +25,6 @@ export const queryKeys = {
   },
   permissions: {
     all: ["permissions"] as const,
+    me: ["permissions", "me"] as const,
   },
 };

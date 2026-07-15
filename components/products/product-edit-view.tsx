@@ -3,10 +3,13 @@
 import type { Category, Product } from "@/lib/backend/types";
 import { useProduct } from "@/hooks/queries/useProducts";
 import { PageHeader } from "@/components/shared/page-header";
+import { PermissionDenied } from "@/components/shared/permission-denied";
 import { ProductDetailsForm } from "@/components/products/product-details-form";
 import { ProductVariantsPanel } from "@/components/products/product-variants-panel";
 import { ProductImagesPanel } from "@/components/products/product-images-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useCan } from "@/components/providers/permissions-provider";
+import { PERMISSIONS } from "@/lib/permissions";
 
 export function ProductEditView({
   productId,
@@ -17,7 +20,10 @@ export function ProductEditView({
   initialProduct: Product;
   categories: Category[];
 }) {
+  const canRead = useCan(PERMISSIONS.productsRead);
   const { data: product = initialProduct } = useProduct(productId, initialProduct);
+
+  if (!canRead) return <PermissionDenied />;
 
   return (
     <div>
@@ -32,10 +38,10 @@ export function ProductEditView({
           <ProductDetailsForm product={product} categories={categories} />
         </TabsContent>
         <TabsContent value="variants">
-          <ProductVariantsPanel productId={product.id} variants={product.variants} />
+          <ProductVariantsPanel productId={product.id} variants={product.variants ?? []} />
         </TabsContent>
         <TabsContent value="images">
-          <ProductImagesPanel productId={product.id} images={product.images} />
+          <ProductImagesPanel productId={product.id} images={product.images ?? []} />
         </TabsContent>
       </Tabs>
     </div>

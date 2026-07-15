@@ -11,9 +11,12 @@ import {
   useInstallment,
 } from "@/hooks/queries/useInstallments";
 import { PageHeader } from "@/components/shared/page-header";
+import { PermissionDenied } from "@/components/shared/permission-denied";
+import { PermissionButton } from "@/components/shared/permission-button";
 import { InstallmentStatusBadge } from "@/components/installments/status-badge";
 import { DeclineDialog } from "@/components/installments/decline-dialog";
-import { Button } from "@/components/ui/button";
+import { useCan } from "@/components/providers/permissions-provider";
+import { PERMISSIONS } from "@/lib/permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function InstallmentReviewView({
@@ -23,6 +26,7 @@ export function InstallmentReviewView({
   applicationId: number;
   initialApplication: InstallmentApplication;
 }) {
+  const canRead = useCan(PERMISSIONS.installmentsRead);
   const { data: application = initialApplication } = useInstallment(
     applicationId,
     initialApplication
@@ -30,6 +34,8 @@ export function InstallmentReviewView({
   const approve = useApproveInstallment(applicationId);
   const decline = useDeclineInstallment(applicationId);
   const forward = useForwardInstallment(applicationId);
+
+  if (!canRead) return <PermissionDenied />;
 
   const currency = new Intl.NumberFormat("en-NG", {
     style: "currency",
@@ -93,10 +99,10 @@ export function InstallmentReviewView({
             <CardTitle className="text-sm">Documents</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            {application.documents.length === 0 && (
+            {(application.documents ?? []).length === 0 && (
               <p className="text-muted-foreground">No documents uploaded.</p>
             )}
-            {application.documents.map((doc) => (
+            {(application.documents ?? []).map((doc) => (
               <div key={doc.id} className="flex items-center justify-between">
                 <span className="capitalize">{doc.doc_type.replace(/_/g, " ")}</span>
                 <a
@@ -115,7 +121,8 @@ export function InstallmentReviewView({
 
       {isPending && (
         <div className="flex items-center gap-2">
-          <Button
+          <PermissionButton
+            permission={PERMISSIONS.installmentsUpdate}
             onClick={async () => {
               try {
                 await approve.mutateAsync();
@@ -127,12 +134,12 @@ export function InstallmentReviewView({
             disabled={approve.isPending}
           >
             <Check /> Approve
-          </Button>
+          </PermissionButton>
           <DeclineDialog
             trigger={
-              <Button variant="destructive">
+              <PermissionButton permission={PERMISSIONS.installmentsUpdate} variant="destructive">
                 <X /> Decline
-              </Button>
+              </PermissionButton>
             }
             onDecline={async (reason) => {
               try {
@@ -143,7 +150,8 @@ export function InstallmentReviewView({
               }
             }}
           />
-          <Button
+          <PermissionButton
+            permission={PERMISSIONS.installmentsUpdate}
             variant="outline"
             onClick={async () => {
               try {
@@ -156,7 +164,7 @@ export function InstallmentReviewView({
             disabled={forward.isPending}
           >
             <Forward /> Forward to partner
-          </Button>
+          </PermissionButton>
         </div>
       )}
     </div>
