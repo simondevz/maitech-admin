@@ -1,29 +1,31 @@
+import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session-server";
-import { logout } from "@/lib/actions/auth";
-import { Button } from "@/components/ui/button";
+import { AppSidebar } from "@/components/dashboard/app-sidebar";
+import { UserNav } from "@/components/dashboard/user-nav";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 
-// Placeholder shell — replaced by the full sidebar layout in the next step.
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const session = await getSession();
+  if (!session) redirect("/login");
 
   return (
-    <div className="min-h-screen">
-      <header className="flex items-center justify-between border-b px-6 py-3">
-        <span className="font-medium">Maritech Admin</span>
-        <form action={logout} className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground">
-            {session?.userType === "dev_admin" ? "dev admin" : session?.roles.join(", ")}
-          </span>
-          <Button type="submit" variant="outline" size="sm">
-            Log out
-          </Button>
-        </form>
-      </header>
-      <main className="p-6">{children}</main>
-    </div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-14 shrink-0 items-center justify-between border-b px-4">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger />
+            <Separator orientation="vertical" className="h-5" />
+          </div>
+          <UserNav session={session} />
+        </header>
+        <main className="flex-1 p-6">{children}</main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
