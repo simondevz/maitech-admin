@@ -136,3 +136,47 @@ export interface InstallmentSettings {
   partner_email: string;
   auto_forward_partner: boolean;
 }
+
+export interface Permission {
+  id: number;
+  group_id: number;
+  name: string;
+  display_name: string;
+  action: string;
+  description: string;
+}
+
+export interface PermissionGroup {
+  name: string;
+  permissions: Permission[];
+}
+
+export interface Role {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  is_system: boolean;
+  created_by?: string;
+  permissions?: Permission[];
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  is_active: boolean;
+  last_login_at?: string;
+  invited_by?: string;
+  created_at: string;
+  updated_at: string;
+  roles: Role[];
+}
+
+export interface Invitation {
+  id: string;
+  email: string;
+  expires_at: string;
+  roles: string[];
+  dev_code?: string;
+}
