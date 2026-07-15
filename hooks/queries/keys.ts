@@ -1,4 +1,5 @@
 import type { ProductFilter } from "@/lib/actions/products";
+import type { InstallmentFilter } from "@/lib/actions/installments";
 
 export const queryKeys = {
   categories: {
@@ -8,5 +9,12 @@ export const queryKeys = {
     all: ["products"] as const,
     list: (filter?: ProductFilter) => ["products", "list", filter ?? {}] as const,
     detail: (id: number) => ["products", "detail", id] as const,
+  },
+  installments: {
+    all: ["installments"] as const,
+    list: (filter?: InstallmentFilter) =>
+      ["installments", "list", filter ?? {}] as const,
+    detail: (id: number) => ["installments", "detail", id] as const,
+    settings: ["installments", "settings"] as const,
   },
 };
