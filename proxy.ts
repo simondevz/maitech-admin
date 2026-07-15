@@ -23,7 +23,7 @@ export async function proxy(request: NextRequest) {
   // Proactively refresh a stale access token so Server Components/Actions
   // downstream in this request never see an expired token.
   if (session && isAccessTokenStale(session) && session.refreshToken) {
-    session = await tryRefresh(session, secret);
+    session = await tryRefresh(session);
   }
 
   if (!session && !isPublic) {
@@ -52,10 +52,7 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
-async function tryRefresh(
-  session: SessionPayload,
-  secret: string
-): Promise<SessionPayload | null> {
+async function tryRefresh(session: SessionPayload): Promise<SessionPayload | null> {
   const baseUrl = process.env.BACKEND_API_URL;
   const apiKey = process.env.BACKEND_API_KEY;
   if (!baseUrl) return session;
