@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import { useCategories } from "@/hooks/queries/useCategories";
@@ -74,11 +74,18 @@ export default function ProductsPage() {
         title="Products"
         description="Manage the product catalog."
         actions={
-          <PermissionButton permission={PERMISSIONS.productsCreate} asChild>
-            <Link href="/products/new">
-              <Plus /> New product
-            </Link>
-          </PermissionButton>
+          <>
+            <Button variant="outline" asChild>
+              <Link href="/products/bulk-import">
+                <Upload /> Bulk import
+              </Link>
+            </Button>
+            <PermissionButton permission={PERMISSIONS.productsCreate} asChild>
+              <Link href="/products/new">
+                <Plus /> New product
+              </Link>
+            </PermissionButton>
+          </>
         }
       />
 
