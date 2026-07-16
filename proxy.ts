@@ -8,6 +8,10 @@ import {
 } from "@/lib/session";
 
 const PUBLIC_PATHS = ["/login"];
+// Never requires auth, and never redirects away even if already logged in —
+// an invited person may click the link while a different session is active
+// (e.g. dev_admin testing the invite they just sent themselves).
+const ALWAYS_ACCESSIBLE_PATHS = ["/accept-invitation"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -17,6 +21,7 @@ export async function proxy(request: NextRequest) {
   }
 
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  const isAlwaysAccessible = ALWAYS_ACCESSIBLE_PATHS.some((p) => pathname.startsWith(p));
   const cookieValue = request.cookies.get(SESSION_COOKIE)?.value;
   let session = await verifySession(cookieValue, secret);
 
@@ -26,7 +31,7 @@ export async function proxy(request: NextRequest) {
     session = await tryRefresh(session);
   }
 
-  if (!session && !isPublic) {
+  if (!session && !isPublic && !isAlwaysAccessible) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", pathname);
     const response = NextResponse.redirect(loginUrl);

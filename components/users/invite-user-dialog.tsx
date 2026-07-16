@@ -5,6 +5,8 @@ import { toast } from "sonner";
 
 import { useRoles } from "@/hooks/queries/useRoles";
 import { useCreateInvitation } from "@/hooks/queries/useUsers";
+import { useCurrentUser } from "@/components/providers/permissions-provider";
+import { getInvitableRoles } from "@/lib/invite-roles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +25,8 @@ export function InviteUserDialog({ trigger }: { trigger: React.ReactNode }) {
   const [email, setEmail] = useState("");
   const [roles, setRoles] = useState<string[]>([]);
   const { data: allRoles } = useRoles();
+  const me = useCurrentUser();
+  const invitableRoles = getInvitableRoles(allRoles ?? [], me);
   const createInvitation = useCreateInvitation();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -63,7 +67,7 @@ export function InviteUserDialog({ trigger }: { trigger: React.ReactNode }) {
           <div className="space-y-1.5">
             <Label>Roles</Label>
             <RoleChecklist
-              roles={allRoles ?? []}
+              roles={invitableRoles}
               selected={roles}
               onChange={setRoles}
             />

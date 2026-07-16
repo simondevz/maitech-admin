@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import type { User } from "@/lib/backend/types";
 import { useRoles } from "@/hooks/queries/useRoles";
 import { useAssignRoles } from "@/hooks/queries/useUsers";
+import { getAssignableRoles } from "@/lib/invite-roles";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,6 +28,7 @@ export function AssignRolesDialog({
   const [open, setOpen] = useState(false);
   const [roles, setRoles] = useState<string[]>((user.roles ?? []).map((r) => r.slug));
   const { data: allRoles } = useRoles();
+  const assignableRoles = getAssignableRoles(allRoles ?? []);
   const assignRoles = useAssignRoles();
 
   function handleOpenChange(next: boolean) {
@@ -53,7 +55,7 @@ export function AssignRolesDialog({
           <DialogTitle>Roles for {user.name}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <RoleChecklist roles={allRoles ?? []} selected={roles} onChange={setRoles} />
+          <RoleChecklist roles={assignableRoles} selected={roles} onChange={setRoles} />
           <DialogFooter>
             <Button type="submit" disabled={assignRoles.isPending}>
               Save roles

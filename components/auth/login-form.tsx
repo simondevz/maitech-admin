@@ -26,13 +26,13 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>;
 
-export function LoginForm() {
+export function LoginForm({ defaultEmail }: { defaultEmail?: string }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: defaultEmail ?? "", password: "" },
   });
 
   async function onSubmit(values: LoginValues) {

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { backendFetch } from "@/lib/backend/client";
-import type { LoginResponse } from "@/lib/backend/types";
+import type { AcceptInvitationResponse, LoginResponse } from "@/lib/backend/types";
 import { clearSession, setSession } from "@/lib/session-server";
 import { decodeJwtClaims } from "@/lib/session";
 
@@ -40,4 +40,21 @@ export async function login(email: string, password: string): Promise<LoginResul
 export async function logout(): Promise<never> {
   await clearSession();
   redirect("/login");
+}
+
+export type AcceptInvitationResult =
+  | { ok: true; data: AcceptInvitationResponse }
+  | { ok: false; error: string };
+
+export async function acceptInvitation(
+  code: string,
+  name: string,
+  password: string
+): Promise<AcceptInvitationResult> {
+  const result = await backendFetch<AcceptInvitationResponse>("/auth/accept-invitation", {
+    method: "POST",
+    body: JSON.stringify({ code, name, password }),
+  });
+  if (!result.ok) return { ok: false, error: result.error.message };
+  return { ok: true, data: result.data };
 }

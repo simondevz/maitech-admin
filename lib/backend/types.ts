@@ -197,3 +197,9 @@ export interface Me {
   /** "*" means every permission (super_admin bypass), not a literal permission name. */
   permissions: string[];
 }
+
+export interface AcceptInvitationResponse {
+  id: string;
+  name: string;
+  email: string;
+}

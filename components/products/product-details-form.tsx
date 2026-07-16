@@ -8,13 +8,15 @@ import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 
 import type { Category, Product } from "@/lib/backend/types";
-import { useCreateProduct, useUpdateProduct } from "@/hooks/queries/useProducts";
+import {
+  useCreateProduct,
+  useUpdateProduct,
+} from "@/hooks/queries/useProducts";
 import { PermissionButton } from "@/components/shared/permission-button";
 import { PERMISSIONS } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -30,6 +32,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Switch } from "../ui/switch";
 
 const productSchema = z.object({
   category_id: z.coerce.number().min(1, "Category is required"),
@@ -43,7 +46,10 @@ const productSchema = z.object({
   in_stock: z.boolean(),
   features: z.array(z.object({ text: z.string().min(1, "Required") })),
   specs: z.array(
-    z.object({ label: z.string().min(1, "Required"), value: z.string().min(1, "Required") })
+    z.object({
+      label: z.string().min(1, "Required"),
+      value: z.string().min(1, "Required"),
+    }),
   ),
 });
 
@@ -71,11 +77,15 @@ export function ProductDetailsForm({
       base_price: product?.base_price ?? 0,
       in_stock: product?.in_stock ?? true,
       features: product?.features?.map((f) => ({ text: f.text })) ?? [],
-      specs: product?.specs?.map((s) => ({ label: s.label, value: s.value })) ?? [],
+      specs:
+        product?.specs?.map((s) => ({ label: s.label, value: s.value })) ?? [],
     },
   });
 
-  const featuresArray = useFieldArray({ control: form.control, name: "features" });
+  const featuresArray = useFieldArray({
+    control: form.control,
+    name: "features",
+  });
   const specsArray = useFieldArray({ control: form.control, name: "specs" });
 
   async function onSubmit(values: ProductValues) {
@@ -84,7 +94,10 @@ export function ProductDetailsForm({
         await updateProduct.mutateAsync(values);
         toast.success("Product saved");
       } else {
-        const created = await createProduct.mutateAsync({ ...values, variants: [] });
+        const created = await createProduct.mutateAsync({
+          ...values,
+          variants: [],
+        });
         toast.success("Product created");
         router.push(`/products/${created.id}`);
       }
@@ -190,7 +203,10 @@ export function ProductDetailsForm({
           render={({ field }) => (
             <FormItem className="flex flex-row items-center gap-2">
               <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
               </FormControl>
               <FormLabel className="!mt-0">In stock</FormLabel>
             </FormItem>
@@ -265,7 +281,9 @@ export function ProductDetailsForm({
         <PermissionButton
           type="submit"
           disabled={form.formState.isSubmitting}
-          permission={isEdit ? PERMISSIONS.productsUpdate : PERMISSIONS.productsCreate}
+          permission={
+            isEdit ? PERMISSIONS.productsUpdate : PERMISSIONS.productsCreate
+          }
         >
           {isEdit ? "Save changes" : "Create product"}
         </PermissionButton>

@@ -27,7 +27,10 @@ export function UserNav() {
         <DropdownMenuLabel>
           <div className="flex flex-col">
             <span>{me.name}</span>
-            <span className="text-xs font-normal text-muted-foreground">{me.email}</span>
+            <span className="text-xs font-normal text-muted-foreground">
+              {me.roles[0]}
+              {me.roles.length > 1 ? ` +${me.roles.length - 1}` : ""}
+            </span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

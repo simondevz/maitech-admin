@@ -42,21 +42,46 @@ export async function backendFetch<T>(
     headers.set("Content-Type", "application/json");
   }
 
+  const debug = process.env.NODE_ENV !== "production";
+  const method = init?.method ?? "GET";
+  const startedAt = Date.now();
+
+  if (debug) {
+    console.log(`[backendFetch] -> ${method} ${path}`, {
+      hasBody: init?.body != null,
+      headers: Object.fromEntries(headers),
+    });
+  }
+
   let res: Response;
   try {
     res = await fetch(`${baseUrl}${path}`, { ...init, headers, cache: "no-store" });
-  } catch {
+  } catch (err) {
+    if (debug) console.error(`[backendFetch] xx ${method} ${path} network error`, err);
     return { ok: false, error: fail("NETWORK_ERROR", "Could not reach the backend", 0) };
   }
 
   let body: BackendEnvelope<T> | undefined;
   try {
     body = await res.json();
-  } catch {
+  } catch (err) {
+    if (debug) {
+      console.error(
+        `[backendFetch] xx ${method} ${path} ${res.status} parse error in ${Date.now() - startedAt}ms`,
+        err
+      );
+    }
     return {
       ok: false,
       error: fail("PARSE_ERROR", res.statusText || "Invalid response from backend", res.status),
     };
+  }
+
+  if (debug) {
+    console.log(
+      `[backendFetch] <- ${method} ${path} ${res.status} in ${Date.now() - startedAt}ms`,
+      body
+    );
   }
 
   if (!body || !body.success) {
