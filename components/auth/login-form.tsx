@@ -26,7 +26,13 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>;
 
-export function LoginForm({ defaultEmail }: { defaultEmail?: string }) {
+export function LoginForm({
+  defaultEmail,
+  notice,
+}: {
+  defaultEmail?: string;
+  notice?: string;
+}) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -52,6 +58,9 @@ export function LoginForm({ defaultEmail }: { defaultEmail?: string }) {
         <CardTitle className="text-center text-xl">Maritech Admin</CardTitle>
       </CardHeader>
       <CardContent>
+        {notice && (
+          <p className="mb-4 text-sm text-muted-foreground">{notice}</p>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
