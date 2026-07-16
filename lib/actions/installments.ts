@@ -31,12 +31,12 @@ export async function listInstallments(
 }
 
 export async function getInstallment(
-  id: number
+  id: string
 ): Promise<BackendResult<InstallmentApplication>> {
   return backendFetch<InstallmentApplication>(`/admin/installments/${id}`);
 }
 
-export async function approveInstallment(id: number): Promise<BackendResult<null>> {
+export async function approveInstallment(id: string): Promise<BackendResult<null>> {
   const result = await backendFetch<null>(`/admin/installments/${id}/approve`, {
     method: "PATCH",
   });
@@ -48,7 +48,7 @@ export async function approveInstallment(id: number): Promise<BackendResult<null
 }
 
 export async function declineInstallment(
-  id: number,
+  id: string,
   reason: string
 ): Promise<BackendResult<null>> {
   const result = await backendFetch<null>(`/admin/installments/${id}/decline`, {
@@ -62,7 +62,7 @@ export async function declineInstallment(
   return result;
 }
 
-export async function forwardInstallment(id: number): Promise<BackendResult<null>> {
+export async function forwardInstallment(id: string): Promise<BackendResult<null>> {
   const result = await backendFetch<null>(`/admin/installments/${id}/forward`, {
     method: "POST",
   });

@@ -25,11 +25,11 @@ export function useProducts(filter?: ProductFilter) {
   });
 }
 
-export function useProduct(id: number, initialData?: Product) {
+export function useProduct(id: string, initialData?: Product) {
   return useQuery({
     queryKey: queryKeys.products.detail(id),
     queryFn: () => unwrap(getProduct(id)),
-    enabled: Number.isFinite(id),
+    enabled: !!id,
     initialData,
   });
 }
@@ -42,7 +42,7 @@ export function useCreateProduct() {
   });
 }
 
-export function useUpdateProduct(id: number) {
+export function useUpdateProduct(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: Partial<ProductInput>) => unwrap(updateProduct(id, input)),
@@ -56,12 +56,12 @@ export function useUpdateProduct(id: number) {
 export function useDeleteProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => unwrap(deleteProduct(id)),
+    mutationFn: (id: string) => unwrap(deleteProduct(id)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.products.all }),
   });
 }
 
-export function useAddVariant(productId: number) {
+export function useAddVariant(productId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: ProductVariantInput) => unwrap(addVariant(productId, input)),
@@ -70,7 +70,7 @@ export function useAddVariant(productId: number) {
   });
 }
 
-export function useUpdateVariant(productId: number) {
+export function useUpdateVariant(productId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
@@ -85,7 +85,7 @@ export function useUpdateVariant(productId: number) {
   });
 }
 
-export function useDeleteVariant(productId: number) {
+export function useDeleteVariant(productId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (variantId: number) => unwrap(deleteVariant(productId, variantId)),
@@ -94,7 +94,7 @@ export function useDeleteVariant(productId: number) {
   });
 }
 
-export function useUploadProductImage(productId: number) {
+export function useUploadProductImage(productId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (file: File) => unwrap(uploadProductImage(productId, file)),
@@ -103,7 +103,7 @@ export function useUploadProductImage(productId: number) {
   });
 }
 
-export function useDeleteProductImage(productId: number) {
+export function useDeleteProductImage(productId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (imageId: number) => unwrap(deleteProductImage(productId, imageId)),

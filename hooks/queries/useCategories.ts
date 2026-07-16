@@ -27,7 +27,7 @@ export function useCreateCategory() {
 export function useUpdateCategory() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, input }: { id: number; input: CategoryInput }) =>
+    mutationFn: ({ id, input }: { id: string; input: CategoryInput }) =>
       unwrap(updateCategory(id, input)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.categories.all }),
   });
@@ -36,7 +36,7 @@ export function useUpdateCategory() {
 export function useDeleteCategory() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => unwrap(deleteCategory(id)),
+    mutationFn: (id: string) => unwrap(deleteCategory(id)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.categories.all }),
   });
 }

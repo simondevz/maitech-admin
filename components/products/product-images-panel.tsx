@@ -15,7 +15,7 @@ export function ProductImagesPanel({
   productId,
   images,
 }: {
-  productId: number;
+  productId: string;
   images: ProductImage[];
 }) {
   const uploadImage = useUploadProductImage(productId);
@@ -37,6 +37,11 @@ export function ProductImagesPanel({
 
   return (
     <div className="space-y-4">
+      {images.length === 0 && (
+        <p className="text-sm text-amber-600">
+          This product has no images. Products should have at least one image.
+        </p>
+      )}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {images.map((image) => (
           <div key={image.id} className="group relative overflow-hidden rounded-md border">

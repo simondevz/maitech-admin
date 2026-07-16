@@ -26,7 +26,7 @@ export async function createCategory(
 }
 
 export async function updateCategory(
-  id: number,
+  id: string,
   input: CategoryInput
 ): Promise<BackendResult<Category>> {
   const result = await backendFetch<Category>(`/admin/categories/${id}`, {
@@ -37,7 +37,7 @@ export async function updateCategory(
   return result;
 }
 
-export async function deleteCategory(id: number): Promise<BackendResult<null>> {
+export async function deleteCategory(id: string): Promise<BackendResult<null>> {
   const result = await backendFetch<null>(`/admin/categories/${id}`, {
     method: "DELETE",
   });

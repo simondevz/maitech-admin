@@ -1,14 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import type { Category } from "@/lib/backend/types";
 import { useCategories, useDeleteCategory } from "@/hooks/queries/useCategories";
 import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PermissionDenied } from "@/components/shared/permission-denied";
 import { PermissionButton } from "@/components/shared/permission-button";
 import { CategoryFormDialog } from "@/components/categories/category-form-dialog";
+import { CategoryDetailDrawer } from "@/components/categories/category-detail-drawer";
 import { useCan } from "@/components/providers/permissions-provider";
 import { PERMISSIONS } from "@/lib/permissions";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,6 +28,9 @@ export default function CategoriesPage() {
   const canRead = useCan(PERMISSIONS.categoriesRead);
   const { data: categories, isLoading, isError, error } = useCategories();
   const deleteCategory = useDeleteCategory();
+  const [selected, setSelected] = useState<Category | null>(null);
+  const [editCategory, setEditCategory] = useState<Category | undefined>(undefined);
+  const [editOpen, setEditOpen] = useState(false);
 
   if (!canRead) return <PermissionDenied />;
 
@@ -78,7 +84,11 @@ export default function CategoriesPage() {
               </TableRow>
             )}
             {categories.map((category) => (
-              <TableRow key={category.id}>
+              <TableRow
+                key={category.id}
+                className="cursor-pointer"
+                onClick={() => setSelected(category)}
+              >
                 <TableCell className="font-medium">{category.name}</TableCell>
                 <TableCell className="text-muted-foreground">{category.slug}</TableCell>
                 <TableCell className="max-w-xs truncate text-muted-foreground">
@@ -86,7 +96,10 @@ export default function CategoriesPage() {
                 </TableCell>
                 <TableCell>{category.products?.length ?? 0}</TableCell>
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-1">
+                  <div
+                    className="flex justify-end gap-1"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <CategoryFormDialog
                       category={category}
                       trigger={
@@ -130,6 +143,22 @@ export default function CategoriesPage() {
           </TableBody>
         </Table>
       )}
+
+      <CategoryDetailDrawer
+        category={selected}
+        open={!!selected}
+        onOpenChange={(open) => !open && setSelected(null)}
+        onEdit={() => {
+          setEditCategory(selected ?? undefined);
+          setSelected(null);
+          setEditOpen(true);
+        }}
+      />
+      <CategoryFormDialog
+        category={editCategory}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+      />
     </div>
   );
 }

@@ -42,11 +42,17 @@ type CategoryValues = z.infer<typeof categorySchema>;
 export function CategoryFormDialog({
   category,
   trigger,
+  open: openProp,
+  onOpenChange: onOpenChangeProp,
 }: {
   category?: Category;
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [openState, setOpenState] = useState(false);
+  const open = openProp ?? openState;
+  const setOpen = onOpenChangeProp ?? setOpenState;
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
   const isEdit = !!category;
@@ -87,7 +93,7 @@ export function CategoryFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit category" : "New category"}</DialogTitle>

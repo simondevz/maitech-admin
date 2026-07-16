@@ -2,15 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, Upload } from "lucide-react";
+import Image from "next/image";
+import { ImageOff, Plus, Pencil, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
+import type { Product } from "@/lib/backend/types";
 import { useCategories } from "@/hooks/queries/useCategories";
 import { useDeleteProduct, useProducts } from "@/hooks/queries/useProducts";
 import { PageHeader } from "@/components/shared/page-header";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PermissionDenied } from "@/components/shared/permission-denied";
 import { PermissionButton } from "@/components/shared/permission-button";
+import { ProductDetailDrawer } from "@/components/products/product-detail-drawer";
 import { useCan } from "@/components/providers/permissions-provider";
 import { PERMISSIONS } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
@@ -46,6 +49,7 @@ export default function ProductsPage() {
   const canRead = useCan(PERMISSIONS.productsRead);
   const [category, setCategory] = useState<string>("all");
   const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<Product | null>(null);
 
   const { data: categories } = useCategories();
   const {
@@ -130,6 +134,7 @@ export default function ProductsPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-14"></TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
@@ -140,18 +145,33 @@ export default function ProductsPage() {
             <TableBody>
               {products.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
                     No products found.
                   </TableCell>
                 </TableRow>
               )}
               {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell className="font-medium">
-                    <Link href={`/products/${product.id}`} className="hover:underline">
-                      {product.name}
-                    </Link>
+                <TableRow
+                  key={product.id}
+                  className="cursor-pointer"
+                  onClick={() => setSelected(product)}
+                >
+                  <TableCell>
+                    {product.images?.[0] ? (
+                      <Image
+                        src={product.images[0].url}
+                        alt=""
+                        width={40}
+                        height={40}
+                        className="aspect-square size-10 rounded-md border object-cover"
+                      />
+                    ) : (
+                      <div className="flex size-10 items-center justify-center rounded-md border bg-muted text-muted-foreground">
+                        <ImageOff className="size-4" />
+                      </div>
+                    )}
                   </TableCell>
+                  <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {product.category?.name ?? "—"}
                   </TableCell>
@@ -162,7 +182,10 @@ export default function ProductsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
+                    <div
+                      className="flex justify-end gap-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <Button variant="ghost" size="icon-sm" asChild>
                         <Link href={`/products/${product.id}`}>
                           <Pencil />
@@ -232,6 +255,12 @@ export default function ProductsPage() {
           </Pagination>
         </>
       )}
+
+      <ProductDetailDrawer
+        product={selected}
+        open={!!selected}
+        onOpenChange={(open) => !open && setSelected(null)}
+      />
     </div>
   );
 }

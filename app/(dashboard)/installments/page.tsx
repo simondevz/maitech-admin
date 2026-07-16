@@ -8,6 +8,7 @@ import { useInstallments } from "@/hooks/queries/useInstallments";
 import { PageHeader } from "@/components/shared/page-header";
 import { PermissionDenied } from "@/components/shared/permission-denied";
 import { InstallmentStatusBadge } from "@/components/installments/status-badge";
+import { InstallmentDetailDrawer } from "@/components/installments/installment-detail-drawer";
 import { useCan } from "@/components/providers/permissions-provider";
 import { PERMISSIONS } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,11 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import type { InstallmentStatus, PlanType } from "@/lib/backend/types";
+import type {
+  InstallmentApplication,
+  InstallmentStatus,
+  PlanType,
+} from "@/lib/backend/types";
 
 const PAGE_SIZE = 20;
 const STATUSES: InstallmentStatus[] = ["pending", "approved", "declined", "forwarded"];
@@ -44,6 +49,7 @@ export default function InstallmentsPage() {
   const [status, setStatus] = useState<string>("all");
   const [planType, setPlanType] = useState<string>("all");
   const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<InstallmentApplication | null>(null);
 
   const {
     data: applications,
@@ -152,20 +158,19 @@ export default function InstallmentsPage() {
                 </TableRow>
               )}
               {applications.map((application) => (
-                <TableRow key={application.id}>
+                <TableRow
+                  key={application.id}
+                  className="cursor-pointer"
+                  onClick={() => setSelected(application)}
+                >
                   <TableCell className="font-medium">
-                    <Link
-                      href={`/installments/${application.id}`}
-                      className="hover:underline"
-                    >
-                      {application.customer_name}
-                    </Link>
+                    {application.customer_name}
                     <div className="text-xs text-muted-foreground">
                       {application.customer_email}
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {application.product?.name ?? `#${application.product_id}`}
+                    {application.product_name}
                   </TableCell>
                   <TableCell className="capitalize">{application.plan_type}</TableCell>
                   <TableCell>{currency.format(application.total_value)}</TableCell>
@@ -205,6 +210,12 @@ export default function InstallmentsPage() {
           </Pagination>
         </>
       )}
+
+      <InstallmentDetailDrawer
+        application={selected}
+        open={!!selected}
+        onOpenChange={(open) => !open && setSelected(null)}
+      />
     </div>
   );
 }

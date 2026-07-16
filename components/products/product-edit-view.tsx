@@ -16,7 +16,7 @@ export function ProductEditView({
   initialProduct,
   categories,
 }: {
-  productId: number;
+  productId: string;
   initialProduct: Product;
   categories: Category[];
 }) {
@@ -38,7 +38,11 @@ export function ProductEditView({
           <ProductDetailsForm product={product} categories={categories} />
         </TabsContent>
         <TabsContent value="variants">
-          <ProductVariantsPanel productId={product.id} variants={product.variants ?? []} />
+          <ProductVariantsPanel
+            productId={product.id}
+            basePrice={product.base_price}
+            variants={product.variants ?? []}
+          />
         </TabsContent>
         <TabsContent value="images">
           <ProductImagesPanel productId={product.id} images={product.images ?? []} />

@@ -29,7 +29,7 @@ export interface RefreshResponse {
 }
 
 export interface Category {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   description: string;
@@ -38,7 +38,7 @@ export interface Category {
 
 export interface ProductVariant {
   id: number;
-  product_id: number;
+  product_id: string;
   name: string;
   price_adjust: number;
   is_default: boolean;
@@ -47,27 +47,27 @@ export interface ProductVariant {
 
 export interface ProductFeature {
   id: number;
-  product_id: number;
+  product_id: string;
   text: string;
 }
 
 export interface ProductSpec {
   id: number;
-  product_id: number;
+  product_id: string;
   label: string;
   value: string;
 }
 
 export interface ProductImage {
   id: number;
-  product_id: number;
+  product_id: string;
   url: string;
   public_id: string;
 }
 
 export interface Product {
-  id: number;
-  category_id: number;
+  id: string;
+  category_id: string;
   name: string;
   slug: string;
   description: string;
@@ -90,7 +90,7 @@ export type EmployerType = "salary_earner" | "business_owner";
 
 export interface InstallmentDocument {
   id: number;
-  application_id: number;
+  application_id: string;
   doc_type: string;
   file_url: string;
   public_id: string;
@@ -98,14 +98,14 @@ export interface InstallmentDocument {
 }
 
 export interface InstallmentApplication {
-  id: number;
+  id: string;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
-  product_id: number;
+  product_id: string;
   variant_id?: number;
-  product?: Product;
-  variant?: ProductVariant;
+  product_name: string;
+  variant_name: string;
   plan_type: PlanType;
   term_months: number;
   equity_percent: number;

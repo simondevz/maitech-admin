@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,6 +9,7 @@ import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 
 import type { Category, Product } from "@/lib/backend/types";
+import { uploadProductImage } from "@/lib/actions/products";
 import {
   useCreateProduct,
   useUpdateProduct,
@@ -33,9 +35,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Switch } from "../ui/switch";
+import { StagedImagePicker } from "@/components/products/staged-image-picker";
 
 const productSchema = z.object({
-  category_id: z.coerce.number().min(1, "Category is required"),
+  category_id: z.string().min(1, "Category is required"),
   name: z.string().min(1, "Name is required"),
   slug: z
     .string()
@@ -65,12 +68,12 @@ export function ProductDetailsForm({
   const router = useRouter();
   const isEdit = !!product;
   const createProduct = useCreateProduct();
-  const updateProduct = useUpdateProduct(product?.id ?? 0);
+  const updateProduct = useUpdateProduct(product?.id ?? "");
 
   const form = useForm({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      category_id: product?.category_id ?? 0,
+      category_id: product?.category_id ?? "",
       name: product?.name ?? "",
       slug: product?.slug ?? "",
       description: product?.description ?? "",
@@ -88,7 +91,16 @@ export function ProductDetailsForm({
   });
   const specsArray = useFieldArray({ control: form.control, name: "specs" });
 
+  const [stagedImages, setStagedImages] = useState<File[]>([]);
+  const [imagesError, setImagesError] = useState<string | null>(null);
+
   async function onSubmit(values: ProductValues) {
+    if (!isEdit && stagedImages.length === 0) {
+      setImagesError("At least one image is required");
+      return;
+    }
+    setImagesError(null);
+
     try {
       if (isEdit) {
         await updateProduct.mutateAsync(values);
@@ -98,6 +110,12 @@ export function ProductDetailsForm({
           ...values,
           variants: [],
         });
+        for (const file of stagedImages) {
+          const result = await uploadProductImage(created.id, file);
+          if (!result.ok) {
+            toast.error(`Failed to upload ${file.name}: ${result.error.message}`);
+          }
+        }
         toast.success("Product created");
         router.push(`/products/${created.id}`);
       }
@@ -142,10 +160,7 @@ export function ProductDetailsForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Category</FormLabel>
-                <Select
-                  value={field.value ? String(field.value) : undefined}
-                  onValueChange={(v) => field.onChange(Number(v))}
-                >
+                <Select value={field.value || undefined} onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select a category" />
@@ -153,7 +168,7 @@ export function ProductDetailsForm({
                   </FormControl>
                   <SelectContent>
                     {categories.map((c) => (
-                      <SelectItem key={c.id} value={String(c.id)}>
+                      <SelectItem key={c.id} value={c.id}>
                         {c.name}
                       </SelectItem>
                     ))}
@@ -277,6 +292,22 @@ export function ProductDetailsForm({
             ))}
           </div>
         </div>
+
+        {!isEdit && (
+          <div>
+            <h3 className="mb-2 text-sm font-medium">Images</h3>
+            <StagedImagePicker
+              files={stagedImages}
+              onChange={(files) => {
+                setStagedImages(files);
+                if (files.length > 0) setImagesError(null);
+              }}
+            />
+            {imagesError && (
+              <p className="mt-2 text-sm text-destructive">{imagesError}</p>
+            )}
+          </div>
+        )}
 
         <PermissionButton
           type="submit"

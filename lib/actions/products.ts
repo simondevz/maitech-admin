@@ -32,7 +32,7 @@ export interface ProductVariantInput {
 }
 
 export interface ProductInput {
-  category_id: number;
+  category_id: string;
   name: string;
   slug: string;
   description: string;
@@ -54,7 +54,7 @@ export async function listProducts(
   return backendFetch<Product[]>(`/admin/products${qs ? `?${qs}` : ""}`);
 }
 
-export async function getProduct(id: number): Promise<BackendResult<Product>> {
+export async function getProduct(id: string): Promise<BackendResult<Product>> {
   return backendFetch<Product>(`/admin/products/${id}`);
 }
 
@@ -70,7 +70,7 @@ export async function createProduct(
 }
 
 export async function updateProduct(
-  id: number,
+  id: string,
   input: Partial<ProductInput>
 ): Promise<BackendResult<Product>> {
   const result = await backendFetch<Product>(`/admin/products/${id}`, {
@@ -84,7 +84,7 @@ export async function updateProduct(
   return result;
 }
 
-export async function deleteProduct(id: number): Promise<BackendResult<null>> {
+export async function deleteProduct(id: string): Promise<BackendResult<null>> {
   const result = await backendFetch<null>(`/admin/products/${id}`, {
     method: "DELETE",
   });
@@ -93,7 +93,7 @@ export async function deleteProduct(id: number): Promise<BackendResult<null>> {
 }
 
 export async function addVariant(
-  productId: number,
+  productId: string,
   input: ProductVariantInput
 ): Promise<BackendResult<ProductVariant>> {
   const result = await backendFetch<ProductVariant>(
@@ -105,7 +105,7 @@ export async function addVariant(
 }
 
 export async function updateVariant(
-  productId: number,
+  productId: string,
   variantId: number,
   input: Partial<ProductVariantInput>
 ): Promise<BackendResult<ProductVariant>> {
@@ -118,7 +118,7 @@ export async function updateVariant(
 }
 
 export async function deleteVariant(
-  productId: number,
+  productId: string,
   variantId: number
 ): Promise<BackendResult<null>> {
   const result = await backendFetch<null>(
@@ -130,7 +130,7 @@ export async function deleteVariant(
 }
 
 export async function uploadProductImage(
-  productId: number,
+  productId: string,
   file: File
 ): Promise<BackendResult<ProductImage>> {
   const formData = new FormData();
@@ -144,7 +144,7 @@ export async function uploadProductImage(
 }
 
 export async function deleteProductImage(
-  productId: number,
+  productId: string,
   imageId: number
 ): Promise<BackendResult<null>> {
   const result = await backendFetch<null>(

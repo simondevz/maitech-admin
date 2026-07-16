@@ -10,11 +10,10 @@ export default async function EditProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const productId = Number(id);
-  if (!Number.isFinite(productId)) notFound();
+  if (!id) notFound();
 
   const [productResult, categoriesResult] = await Promise.all([
-    getProduct(productId),
+    getProduct(id),
     listCategories(),
   ]);
 
@@ -28,7 +27,7 @@ export default async function EditProductPage({
 
   return (
     <ProductEditView
-      productId={productId}
+      productId={id}
       initialProduct={productResult.data}
       categories={categories}
     />

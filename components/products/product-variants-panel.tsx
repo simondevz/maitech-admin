@@ -33,11 +33,19 @@ const variantSchema = z.object({
 
 type VariantValues = z.infer<typeof variantSchema>;
 
+const currency = new Intl.NumberFormat("en-NG", {
+  style: "currency",
+  currency: "NGN",
+  maximumFractionDigits: 0,
+});
+
 export function ProductVariantsPanel({
   productId,
+  basePrice,
   variants,
 }: {
-  productId: number;
+  productId: string;
+  basePrice: number;
   variants: ProductVariant[];
 }) {
   const canUpdate = useCan(PERMISSIONS.productsUpdate);
@@ -65,6 +73,7 @@ export function ProductVariantsPanel({
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Price adjust</TableHead>
+            <TableHead>Sell price</TableHead>
             <TableHead>Default</TableHead>
             <TableHead>Stock</TableHead>
             <TableHead className="w-16 text-right">Actions</TableHead>
@@ -73,7 +82,7 @@ export function ProductVariantsPanel({
         <TableBody>
           {variants.length === 0 && (
             <TableRow>
-              <TableCell colSpan={5} className="text-center text-muted-foreground">
+              <TableCell colSpan={6} className="text-center text-muted-foreground">
                 No variants yet.
               </TableCell>
             </TableRow>
@@ -82,6 +91,7 @@ export function ProductVariantsPanel({
             <VariantRow
               key={variant.id}
               productId={productId}
+              basePrice={basePrice}
               variant={variant}
               canUpdate={canUpdate}
             />
@@ -118,10 +128,12 @@ export function ProductVariantsPanel({
 
 function VariantRow({
   productId,
+  basePrice,
   variant,
   canUpdate,
 }: {
-  productId: number;
+  productId: string;
+  basePrice: number;
   variant: ProductVariant;
   canUpdate: boolean;
 }) {
@@ -143,7 +155,10 @@ function VariantRow({
           }}
         />
       </TableCell>
-      <TableCell>₦{variant.price_adjust.toLocaleString()}</TableCell>
+      <TableCell>{currency.format(variant.price_adjust)}</TableCell>
+      <TableCell className="font-medium">
+        {currency.format(basePrice + variant.price_adjust)}
+      </TableCell>
       <TableCell>
         <Switch
           checked={variant.is_default}
