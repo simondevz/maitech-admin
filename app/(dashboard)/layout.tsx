@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSession, clearSession } from "@/lib/session-server";
+import { getSession } from "@/lib/session-server";
 import { getMe } from "@/lib/actions/permissions";
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { UserNav } from "@/components/dashboard/user-nav";
@@ -21,8 +21,7 @@ export default async function DashboardLayout({
     // was deleted) with an auth-shaped error — treat that as a stale
     // session rather than crashing the whole dashboard.
     if (meResult.error.status === 401 || meResult.error.status === 404) {
-      await clearSession();
-      redirect("/login?sessionExpired=1");
+      redirect("/api/auth/clear-session?redirectTo=" + encodeURIComponent("/login?sessionExpired=1"));
     }
     throw new Error(meResult.error.message);
   }
