@@ -91,9 +91,9 @@ export function ProductImagesPanel({
         variant="outline"
         permission={PERMISSIONS.productsUpdate}
         onClick={() => inputRef.current?.click()}
-        disabled={uploadImage.isPending}
+        loading={uploadImage.isPending}
       >
-        <Upload /> {uploadImage.isPending ? "Uploading..." : "Upload image"}
+        <Upload /> Upload image
       </PermissionButton>
     </div>
   );

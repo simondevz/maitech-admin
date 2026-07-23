@@ -110,8 +110,8 @@ export function AcceptInvitationForm({ code, email }: { code: string; email: str
               )}
             />
             {serverError && <p className="text-sm text-destructive">{serverError}</p>}
-            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Setting password..." : "Set password"}
+            <Button type="submit" className="w-full" loading={form.formState.isSubmitting}>
+              Set password
             </Button>
           </form>
         </Form>

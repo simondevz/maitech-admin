@@ -84,7 +84,7 @@ export interface Product {
   images?: ProductImage[];
 }
 
-export type InstallmentStatus = "pending" | "approved" | "declined" | "forwarded";
+export type InstallmentStatus = "draft" | "pending" | "approved" | "declined" | "forwarded";
 export type PlanType = "maritech" | "partner";
 export type EmployerType = "salary_earner" | "business_owner";
 
@@ -137,6 +137,12 @@ export interface InstallmentSettings {
   maritech_monthly_rate: number;
   doc_fee: number;
   mgmt_fee_pct: number;
+  partner_monthly_rate: number;
+  partner_mgmt_fee_pct: number;
+  partner_equity_min: number;
+  partner_equity_max: number;
+  partner_equity_step: number;
+  partner_term_months: string;
   partner_email: string;
   auto_forward_partner: boolean;
 }

@@ -311,7 +311,7 @@ export function ProductDetailsForm({
 
         <PermissionButton
           type="submit"
-          disabled={form.formState.isSubmitting}
+          loading={form.formState.isSubmitting}
           permission={
             isEdit ? PERMISSIONS.productsUpdate : PERMISSIONS.productsCreate
           }

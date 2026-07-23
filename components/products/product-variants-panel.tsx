@@ -116,7 +116,7 @@ export function ProductVariantsPanel({
         </div>
         <PermissionButton
           type="submit"
-          disabled={form.formState.isSubmitting}
+          loading={form.formState.isSubmitting}
           permission={PERMISSIONS.productsUpdate}
         >
           <Plus /> Add variant

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { Check, X } from "lucide-react";
+import { Check, X, Send } from "lucide-react";
 
 import type { InstallmentApplication } from "@/lib/backend/types";
 import {
   useApproveInstallment,
   useDeclineInstallment,
+  useForwardInstallment,
   useInstallment,
 } from "@/hooks/queries/useInstallments";
 import { DetailDrawer } from "@/components/shared/detail-drawer";
@@ -16,7 +17,6 @@ import { DocumentPreviewDialog } from "@/components/installments/document-previe
 import { PermissionButton } from "@/components/shared/permission-button";
 import { PERMISSIONS } from "@/lib/permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const currency = new Intl.NumberFormat("en-NG", {
   style: "currency",
@@ -40,9 +40,14 @@ export function InstallmentDetailDrawer({
   const applicationId = application?.id ?? "";
   const approve = useApproveInstallment(applicationId);
   const decline = useDeclineInstallment(applicationId);
+  const forward = useForwardInstallment(applicationId);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   const isPending = application?.status === "pending";
+  const canForward =
+    application?.status === "approved" &&
+    application?.plan_type === "partner" &&
+    !application?.forwarded_at;
 
   return (
     <DetailDrawer
@@ -52,57 +57,61 @@ export function InstallmentDetailDrawer({
       description={application?.customer_email}
       footer={
         application &&
-        isPending && (
-          // TODO: approve/decline flow (post-approval handling, edge cases) is
-          // still being finalized — buttons are disabled until it's ready.
+        (isPending || canForward) && (
           <div className="flex flex-wrap items-center gap-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span tabIndex={0}>
-                  <PermissionButton
-                    permission={PERMISSIONS.installmentsUpdate}
-                    onClick={async () => {
-                      try {
-                        await approve.mutateAsync();
-                        toast.success("Application approved");
-                      } catch (err) {
-                        toast.error(err instanceof Error ? err.message : "Failed to approve");
-                      }
-                    }}
-                    disabled
-                  >
-                    <Check /> Approve
-                  </PermissionButton>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>Approve/decline flow is still being finalized.</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span tabIndex={0}>
-                  <DeclineDialog
-                    trigger={
-                      <PermissionButton
-                        permission={PERMISSIONS.installmentsUpdate}
-                        variant="destructive"
-                        disabled
-                      >
-                        <X /> Decline
-                      </PermissionButton>
+            {isPending && (
+              <>
+                <PermissionButton
+                  permission={PERMISSIONS.installmentsUpdate}
+                  loading={approve.isPending}
+                  onClick={async () => {
+                    try {
+                      await approve.mutateAsync();
+                      toast.success("Application approved");
+                    } catch (err) {
+                      toast.error(err instanceof Error ? err.message : "Failed to approve");
                     }
-                    onDecline={async (reason) => {
-                      try {
-                        await decline.mutateAsync(reason);
-                        toast.success("Application declined");
-                      } catch (err) {
-                        toast.error(err instanceof Error ? err.message : "Failed to decline");
-                      }
-                    }}
-                  />
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>Approve/decline flow is still being finalized.</TooltipContent>
-            </Tooltip>
+                  }}
+                >
+                  <Check /> Approve
+                </PermissionButton>
+                <DeclineDialog
+                  trigger={
+                    <PermissionButton
+                      permission={PERMISSIONS.installmentsUpdate}
+                      variant="destructive"
+                      loading={decline.isPending}
+                    >
+                      <X /> Decline
+                    </PermissionButton>
+                  }
+                  onDecline={async (reason) => {
+                    try {
+                      await decline.mutateAsync(reason);
+                      toast.success("Application declined");
+                    } catch (err) {
+                      toast.error(err instanceof Error ? err.message : "Failed to decline");
+                    }
+                  }}
+                />
+              </>
+            )}
+            {canForward && (
+              <PermissionButton
+                permission={PERMISSIONS.installmentsUpdate}
+                loading={forward.isPending}
+                onClick={async () => {
+                  try {
+                    await forward.mutateAsync();
+                    toast.success("Application forwarded to partner");
+                  } catch (err) {
+                    toast.error(err instanceof Error ? err.message : "Failed to forward");
+                  }
+                }}
+              >
+                <Send /> Forward to partner
+              </PermissionButton>
+            )}
           </div>
         )
       }
@@ -150,8 +159,12 @@ export function InstallmentDetailDrawer({
                 label="Monthly payment"
                 value={currency.format(application.monthly_payment)}
               />
-              <DetailRow label="Doc fee" value={currency.format(application.doc_fee)} />
-              <DetailRow label="Mgmt fee" value={currency.format(application.mgmt_fee)} />
+              {application.plan_type === "maritech" && (
+                <DetailRow label="Management fee" value={currency.format(application.doc_fee)} />
+              )}
+              {application.plan_type === "partner" && (
+                <DetailRow label="Admin fee" value={currency.format(application.mgmt_fee)} />
+              )}
             </CardContent>
           </Card>
 

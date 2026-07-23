@@ -73,7 +73,7 @@ export function InviteUserDialog({ trigger }: { trigger: React.ReactNode }) {
             />
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={createInvitation.isPending}>
+            <Button type="submit" loading={createInvitation.isPending}>
               Send invitation
             </Button>
           </DialogFooter>

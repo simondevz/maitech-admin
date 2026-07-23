@@ -26,7 +26,15 @@ const settingsSchema = z.object({
   maritech_upfront_pct: z.coerce.number().min(0).max(100),
   maritech_monthly_rate: z.coerce.number().min(0),
   doc_fee: z.coerce.number().min(0),
-  mgmt_fee_pct: z.coerce.number().min(0).max(100),
+  partner_monthly_rate: z.coerce.number().min(0),
+  partner_mgmt_fee_pct: z.coerce.number().min(0).max(100),
+  partner_equity_min: z.coerce.number().min(0).max(100),
+  partner_equity_max: z.coerce.number().min(0).max(100),
+  partner_equity_step: z.coerce.number().min(0.01),
+  partner_term_months: z
+    .string()
+    .min(1, "Enter at least one term, e.g. 6,9,12")
+    .regex(/^\d+(\s*,\s*\d+)*$/, "Use comma-separated numbers, e.g. 6,9,12"),
   partner_email: z.string().email("Enter a valid email"),
   auto_forward_partner: z.boolean(),
 });
@@ -42,7 +50,12 @@ export function InstallmentSettingsForm({ settings }: { settings: InstallmentSet
       maritech_upfront_pct: settings.maritech_upfront_pct,
       maritech_monthly_rate: settings.maritech_monthly_rate,
       doc_fee: settings.doc_fee,
-      mgmt_fee_pct: settings.mgmt_fee_pct,
+      partner_monthly_rate: settings.partner_monthly_rate,
+      partner_mgmt_fee_pct: settings.partner_mgmt_fee_pct,
+      partner_equity_min: settings.partner_equity_min,
+      partner_equity_max: settings.partner_equity_max,
+      partner_equity_step: settings.partner_equity_step,
+      partner_term_months: settings.partner_term_months,
       partner_email: settings.partner_email,
       auto_forward_partner: settings.auto_forward_partner,
     },
@@ -118,7 +131,23 @@ export function InstallmentSettingsForm({ settings }: { settings: InstallmentSet
             name="doc_fee"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Document fee (₦)</FormLabel>
+                <FormLabel>Maritech Management Fee (₦)</FormLabel>
+                <FormControl>
+                  <Input type="number" step="0.01" {...field} value={field.value as number} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="partner_monthly_rate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Partner monthly rate %</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.01" {...field} value={field.value as number} />
                 </FormControl>
@@ -128,12 +157,64 @@ export function InstallmentSettingsForm({ settings }: { settings: InstallmentSet
           />
           <FormField
             control={form.control}
-            name="mgmt_fee_pct"
+            name="partner_mgmt_fee_pct"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Management fee %</FormLabel>
+                <FormLabel>Partner admin fee % (on financed amount)</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.01" {...field} value={field.value as number} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="partner_equity_min"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Partner equity min %</FormLabel>
+                <FormControl>
+                  <Input type="number" step="1" {...field} value={field.value as number} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="partner_equity_max"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Partner equity max %</FormLabel>
+                <FormControl>
+                  <Input type="number" step="1" {...field} value={field.value as number} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="partner_equity_step"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Partner equity step %</FormLabel>
+                <FormControl>
+                  <Input type="number" step="1" {...field} value={field.value as number} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="partner_term_months"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Partner term options (months)</FormLabel>
+                <FormControl>
+                  <Input type="text" placeholder="6,9,12" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -163,14 +244,14 @@ export function InstallmentSettingsForm({ settings }: { settings: InstallmentSet
               <FormControl>
                 <Switch checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
-              <FormLabel className="!mt-0">Auto-forward to partner when full</FormLabel>
+              <FormLabel className="!mt-0">Auto-approve &amp; forward partner applications</FormLabel>
             </FormItem>
           )}
         />
 
         <PermissionButton
           type="submit"
-          disabled={form.formState.isSubmitting}
+          loading={form.formState.isSubmitting}
           permission={PERMISSIONS.installmentsUpdate}
         >
           Save settings

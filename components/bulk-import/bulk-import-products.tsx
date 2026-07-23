@@ -243,7 +243,7 @@ export function BulkImportProducts() {
 
           <div className="flex items-center gap-2">
             {submittableIndices.length > 0 && (
-              <Button onClick={handleSubmit} disabled={bulkImport.isPending}>
+              <Button onClick={handleSubmit} loading={bulkImport.isPending}>
                 {hasSubmitted
                   ? `Retry ${submittableIndices.length} failed row${submittableIndices.length === 1 ? "" : "s"}`
                   : `Import ${submittableIndices.length} product${submittableIndices.length === 1 ? "" : "s"}`}

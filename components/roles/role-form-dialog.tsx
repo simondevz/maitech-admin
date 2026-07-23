@@ -105,7 +105,7 @@ export function RoleFormDialog({ trigger }: { trigger: React.ReactNode }) {
               )}
             />
             <DialogFooter>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
+              <Button type="submit" loading={form.formState.isSubmitting}>
                 Create role
               </Button>
             </DialogFooter>

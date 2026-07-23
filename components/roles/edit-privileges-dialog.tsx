@@ -5,9 +5,9 @@ import { toast } from "sonner";
 
 import type { Role } from "@/lib/backend/types";
 import { useAssignPrivileges, usePermissionGroups } from "@/hooks/queries/useRoles";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { badgeVariants } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,29 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
+function PermissionChip({
+  label,
+  selected,
+  onClick,
+}: {
+  label: string;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        badgeVariants({ variant: selected ? "default" : "outline" }),
+        "cursor-pointer px-3 py-1 text-sm transition-colors hover:opacity-80"
+      )}
+    >
+      {label}
+    </button>
+  );
+}
 
 export function EditPrivilegesDialog({
   role,
@@ -34,6 +57,27 @@ export function EditPrivilegesDialog({
   function handleOpenChange(next: boolean) {
     setOpen(next);
     if (next) setSelected(role.permissions?.map((p) => p.id) ?? []);
+  }
+
+  function toggleRead(readId: number, dependentIds: number[]) {
+    setSelected((prev) => {
+      if (prev.includes(readId)) {
+        if (dependentIds.some((id) => prev.includes(id))) {
+          toast.info("Removed dependent permissions");
+        }
+        return prev.filter((id) => id !== readId && !dependentIds.includes(id));
+      }
+      return [...prev, readId];
+    });
+  }
+
+  function toggleDependent(id: number, readId: number) {
+    setSelected((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((x) => x !== id);
+      }
+      return prev.includes(readId) ? [...prev, id] : [...prev, id, readId];
+    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -59,36 +103,55 @@ export function EditPrivilegesDialog({
           <DialogTitle>Privileges — {role.name}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-5">
-          {groups?.map((group) => (
-            <div key={group.name}>
-              <h3 className="mb-2 text-sm font-medium capitalize">{group.name}</h3>
-              <div className="flex flex-wrap gap-4">
-                {group.permissions.map((permission) => {
-                  const checked = selected.includes(permission.id);
-                  return (
-                    <div key={permission.id} className="flex items-center gap-2">
-                      <Checkbox
-                        id={`perm-${permission.id}`}
-                        checked={checked}
-                        onCheckedChange={(value) =>
-                          setSelected((prev) =>
-                            value
-                              ? [...prev, permission.id]
-                              : prev.filter((id) => id !== permission.id)
-                          )
+          {groups?.map((group) => {
+            const readPermission = group.permissions.find((p) => p.action === "read");
+            const dependents = group.permissions.filter((p) => p.action !== "read");
+
+            return (
+              <div key={group.name}>
+                <h3 className="mb-2 text-sm font-medium capitalize">{group.name}</h3>
+                {readPermission && (
+                  <PermissionChip
+                    label={readPermission.action}
+                    selected={selected.includes(readPermission.id)}
+                    onClick={() =>
+                      toggleRead(
+                        readPermission.id,
+                        dependents.map((p) => p.id)
+                      )
+                    }
+                  />
+                )}
+                {dependents.length > 0 && (
+                  <div
+                    className={cn(
+                      "mt-2 flex flex-wrap gap-2",
+                      readPermission && "ml-3 border-l-2 border-border pl-3"
+                    )}
+                  >
+                    {dependents.map((permission) => (
+                      <PermissionChip
+                        key={permission.id}
+                        label={permission.action}
+                        selected={selected.includes(permission.id)}
+                        onClick={() =>
+                          readPermission
+                            ? toggleDependent(permission.id, readPermission.id)
+                            : setSelected((prev) =>
+                                prev.includes(permission.id)
+                                  ? prev.filter((id) => id !== permission.id)
+                                  : [...prev, permission.id]
+                              )
                         }
                       />
-                      <Label htmlFor={`perm-${permission.id}`} className="font-normal">
-                        {permission.action}
-                      </Label>
-                    </div>
-                  );
-                })}
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
           <DialogFooter>
-            <Button type="submit" disabled={assignPrivileges.isPending}>
+            <Button type="submit" loading={assignPrivileges.isPending}>
               Save
             </Button>
           </DialogFooter>

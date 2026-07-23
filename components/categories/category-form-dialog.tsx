@@ -140,7 +140,7 @@ export function CategoryFormDialog({
               )}
             />
             <DialogFooter>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
+              <Button type="submit" loading={form.formState.isSubmitting}>
                 {isEdit ? "Save changes" : "Create category"}
               </Button>
             </DialogFooter>

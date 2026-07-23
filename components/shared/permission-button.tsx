@@ -9,6 +9,7 @@ import type { VariantProps } from "class-variance-authority";
 type PermissionButtonProps = React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
+    loading?: boolean;
     /** A single permission, or a list — any one of which is sufficient. */
     permission: string | string[];
   };
@@ -22,6 +23,7 @@ type PermissionButtonProps = React.ComponentProps<"button"> &
 export function PermissionButton({
   permission,
   disabled,
+  loading,
   asChild,
   children,
   ...props
@@ -30,7 +32,7 @@ export function PermissionButton({
 
   if (allowed) {
     return (
-      <Button disabled={disabled} asChild={asChild} {...props}>
+      <Button disabled={disabled} loading={loading} asChild={asChild} {...props}>
         {children}
       </Button>
     );

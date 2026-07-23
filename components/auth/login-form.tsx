@@ -99,9 +99,9 @@ export function LoginForm({
             <Button
               type="submit"
               className="w-full"
-              disabled={form.formState.isSubmitting}
+              loading={form.formState.isSubmitting}
             >
-              {form.formState.isSubmitting ? "Signing in..." : "Sign in"}
+              Sign in
             </Button>
           </form>
         </Form>

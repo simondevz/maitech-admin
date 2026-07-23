@@ -42,7 +42,7 @@ import type {
 } from "@/lib/backend/types";
 
 const PAGE_SIZE = 20;
-const STATUSES: InstallmentStatus[] = ["pending", "approved", "declined", "forwarded"];
+const STATUSES: InstallmentStatus[] = ["draft", "pending", "approved", "declined", "forwarded"];
 
 export default function InstallmentsPage() {
   const canRead = useCan(PERMISSIONS.installmentsRead);

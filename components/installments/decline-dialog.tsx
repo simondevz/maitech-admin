@@ -56,8 +56,8 @@ export function DeclineDialog({
             onChange={(e) => setReason(e.target.value)}
           />
           <DialogFooter>
-            <Button type="submit" variant="destructive" disabled={pending}>
-              {pending ? "Declining..." : "Decline application"}
+            <Button type="submit" variant="destructive" loading={pending}>
+              Decline application
             </Button>
           </DialogFooter>
         </form>

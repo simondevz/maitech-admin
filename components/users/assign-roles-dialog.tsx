@@ -57,7 +57,7 @@ export function AssignRolesDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           <RoleChecklist roles={assignableRoles} selected={roles} onChange={setRoles} />
           <DialogFooter>
-            <Button type="submit" disabled={assignRoles.isPending}>
+            <Button type="submit" loading={assignRoles.isPending}>
               Save roles
             </Button>
           </DialogFooter>

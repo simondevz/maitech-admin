@@ -5,6 +5,7 @@ const STATUS_VARIANT: Record<
   InstallmentStatus,
   "default" | "secondary" | "destructive" | "outline"
 > = {
+  draft: "outline",
   pending: "secondary",
   approved: "default",
   declined: "destructive",
