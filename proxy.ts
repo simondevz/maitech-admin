@@ -9,9 +9,9 @@ import {
 
 const PUBLIC_PATHS = ["/login"];
 // Never requires auth, and never redirects away even if already logged in —
-// an invited person may click the link while a different session is active
-// (e.g. dev_admin testing the invite they just sent themselves).
-const ALWAYS_ACCESSIBLE_PATHS = ["/accept-invitation"];
+// an invited/reset-password person may click the link while a different
+// session is active (e.g. dev_admin testing an email they just sent themselves).
+const ALWAYS_ACCESSIBLE_PATHS = ["/accept-invitation", "/reset-password"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

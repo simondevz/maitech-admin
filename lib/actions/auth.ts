@@ -58,3 +58,14 @@ export async function acceptInvitation(
   if (!result.ok) return { ok: false, error: result.error.message };
   return { ok: true, data: result.data };
 }
+
+export type ResetPasswordResult = { ok: true } | { ok: false; error: string };
+
+export async function resetPassword(code: string, password: string): Promise<ResetPasswordResult> {
+  const result = await backendFetch<null>("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ code, password }),
+  });
+  if (!result.ok) return { ok: false, error: result.error.message };
+  return { ok: true };
+}
