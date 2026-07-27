@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { Trash2, Upload } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { validateImageFile } from "@/lib/upload-limits";
 
 export function StagedImagePicker({
   files,
@@ -21,7 +23,16 @@ export function StagedImagePicker({
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(e.target.files ?? []);
-    if (selected.length > 0) onChange([...files, ...selected]);
+    const valid: File[] = [];
+    for (const file of selected) {
+      const validationError = validateImageFile(file);
+      if (validationError) {
+        toast.error(validationError);
+      } else {
+        valid.push(file);
+      }
+    }
+    if (valid.length > 0) onChange([...files, ...valid]);
     e.target.value = "";
   }
 
@@ -62,6 +73,7 @@ export function StagedImagePicker({
       <Button type="button" variant="outline" onClick={() => inputRef.current?.click()}>
         <Upload /> {files.length > 0 ? "Add more images" : "Add image"}
       </Button>
+      <p className="text-xs text-muted-foreground">Max 5MB per image</p>
     </div>
   );
 }

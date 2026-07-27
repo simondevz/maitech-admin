@@ -10,6 +10,7 @@ import { useDeleteProductImage, useUploadProductImage } from "@/hooks/queries/us
 import { PermissionButton } from "@/components/shared/permission-button";
 import { PERMISSIONS } from "@/lib/permissions";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { validateImageFile } from "@/lib/upload-limits";
 
 export function ProductImagesPanel({
   productId,
@@ -25,6 +26,12 @@ export function ProductImagesPanel({
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      toast.error(validationError);
+      e.target.value = "";
+      return;
+    }
     try {
       await uploadImage.mutateAsync(file);
       toast.success("Image uploaded");
@@ -95,6 +102,7 @@ export function ProductImagesPanel({
       >
         <Upload /> Upload image
       </PermissionButton>
+      <p className="text-xs text-muted-foreground">Max 5MB per image</p>
     </div>
   );
 }
