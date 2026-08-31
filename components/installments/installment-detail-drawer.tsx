@@ -12,6 +12,7 @@ import {
 import { DetailDrawer } from "@/components/shared/detail-drawer";
 import { DetailRow } from "@/components/shared/detail-row";
 import { InstallmentStatusBadge } from "@/components/installments/status-badge";
+import { ApproveDialog } from "@/components/installments/approve-dialog";
 import { DeclineDialog } from "@/components/installments/decline-dialog";
 import { DocumentPreviewDialog } from "@/components/installments/document-preview-dialog";
 import { PermissionButton } from "@/components/shared/permission-button";
@@ -61,20 +62,24 @@ export function InstallmentDetailDrawer({
           <div className="flex flex-wrap items-center gap-2">
             {isPending && (
               <>
-                <PermissionButton
-                  permission={PERMISSIONS.installmentsUpdate}
-                  loading={approve.isPending}
-                  onClick={async () => {
+                <ApproveDialog
+                  trigger={
+                    <PermissionButton
+                      permission={PERMISSIONS.installmentsUpdate}
+                      loading={approve.isPending}
+                    >
+                      <Check /> Approve
+                    </PermissionButton>
+                  }
+                  onApprove={async (details) => {
                     try {
-                      await approve.mutateAsync();
+                      await approve.mutateAsync(details || undefined);
                       toast.success("Application approved");
                     } catch (err) {
                       toast.error(err instanceof Error ? err.message : "Failed to approve");
                     }
                   }}
-                >
-                  <Check /> Approve
-                </PermissionButton>
+                />
                 <DeclineDialog
                   trigger={
                     <PermissionButton
@@ -135,6 +140,11 @@ export function InstallmentDetailDrawer({
           {application.decline_reason && (
             <p className="text-destructive">
               Decline reason: {application.decline_reason}
+            </p>
+          )}
+          {application.approval_details && (
+            <p className="text-muted-foreground">
+              Additional details: {application.approval_details}
             </p>
           )}
 

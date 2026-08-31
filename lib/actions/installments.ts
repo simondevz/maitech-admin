@@ -36,9 +36,13 @@ export async function getInstallment(
   return backendFetch<InstallmentApplication>(`/admin/installments/${id}`);
 }
 
-export async function approveInstallment(id: string): Promise<BackendResult<null>> {
+export async function approveInstallment(
+  id: string,
+  details?: string
+): Promise<BackendResult<null>> {
   const result = await backendFetch<null>(`/admin/installments/${id}/approve`, {
     method: "PATCH",
+    ...(details ? { body: JSON.stringify({ details }) } : {}),
   });
   if (result.ok) {
     revalidatePath("/installments");

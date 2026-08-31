@@ -122,6 +122,7 @@ export interface InstallmentApplication {
   reviewed_by?: string;
   reviewed_at?: string;
   decline_reason?: string;
+  approval_details?: string;
   forwarded_at?: string;
   // Backend tags this `omitempty` — no documents uploaded means the key is
   // dropped entirely, not sent as `[]`.

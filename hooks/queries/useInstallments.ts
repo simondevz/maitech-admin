@@ -36,7 +36,7 @@ export function useInstallment(id: string, initialData?: InstallmentApplication)
 export function useApproveInstallment(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => unwrap(approveInstallment(id)),
+    mutationFn: (details?: string) => unwrap(approveInstallment(id, details)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.installments.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.installments.detail(id) });
