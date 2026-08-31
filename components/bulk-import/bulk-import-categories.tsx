@@ -20,6 +20,7 @@ import {
   downloadTextFile,
   parseSpreadsheetFile,
 } from "@/lib/bulk-import/spreadsheet";
+import { SLUG_MESSAGE, isValidSlug } from "@/lib/slug";
 
 interface ParsedRow {
   row: BulkCategoryRow;
@@ -31,9 +32,15 @@ function toRows(raw: Record<string, string>[]): ParsedRow[] {
     const name = (r.name ?? "").trim();
     const slug = (r.slug ?? "").trim();
     const description = (r.description ?? "").trim();
+    let error: string | undefined;
+    if (!name || !slug) {
+      error = "name and slug are required";
+    } else if (!isValidSlug(slug)) {
+      error = `slug: ${SLUG_MESSAGE}`;
+    }
     return {
       row: { name, slug, description },
-      error: !name || !slug ? "name and slug are required" : undefined,
+      error,
     };
   });
 }

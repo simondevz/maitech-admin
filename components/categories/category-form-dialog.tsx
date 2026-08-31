@@ -7,6 +7,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 
 import type { Category } from "@/lib/backend/types";
+import { slugSchema } from "@/lib/slug";
 import { useCreateCategory, useUpdateCategory } from "@/hooks/queries/useCategories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,10 +31,7 @@ import {
 
 const categorySchema = z.object({
   name: z.string().min(1, "Name is required"),
-  slug: z
-    .string()
-    .min(1, "Slug is required")
-    .regex(/^[a-z0-9-]+$/, "Use lowercase letters, numbers, and hyphens only"),
+  slug: slugSchema,
   description: z.string(),
 });
 

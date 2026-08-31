@@ -16,6 +16,7 @@ import {
 } from "@/hooks/queries/useProducts";
 import { PermissionButton } from "@/components/shared/permission-button";
 import { PERMISSIONS } from "@/lib/permissions";
+import { slugSchema } from "@/lib/slug";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,10 +41,7 @@ import { StagedImagePicker } from "@/components/products/staged-image-picker";
 const productSchema = z.object({
   category_id: z.string().min(1, "Category is required"),
   name: z.string().min(1, "Name is required"),
-  slug: z
-    .string()
-    .min(1, "Slug is required")
-    .regex(/^[a-z0-9-]+$/, "Use lowercase letters, numbers, and hyphens only"),
+  slug: slugSchema,
   description: z.string(),
   base_price: z.coerce.number().min(0, "Price must be positive"),
   in_stock: z.boolean(),

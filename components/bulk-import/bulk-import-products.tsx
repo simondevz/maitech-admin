@@ -22,6 +22,7 @@ import {
   parseSpreadsheetFile,
   splitList,
 } from "@/lib/bulk-import/spreadsheet";
+import { SLUG_MESSAGE, isValidSlug } from "@/lib/slug";
 
 interface ParsedRow {
   row: BulkProductRow;
@@ -56,6 +57,10 @@ function toRows(raw: Record<string, string>[]): ParsedRow[] {
     let error: string | undefined;
     if (!category_slug || !name || !slug) {
       error = "category_slug, name and slug are required";
+    } else if (!isValidSlug(slug)) {
+      error = `slug: ${SLUG_MESSAGE}`;
+    } else if (!isValidSlug(category_slug)) {
+      error = `category_slug: ${SLUG_MESSAGE}`;
     } else if (!basePriceRaw || Number.isNaN(base_price) || base_price <= 0) {
       error = "base_price must be a positive number";
     }
